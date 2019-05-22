@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue May 21 22:03:16 2019
+
+@author: manishsandil
+"""
+
+import numpy as np
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import tflearn
+from tflearn.layers.conv import conv_2d, max_pool_2d
+from tflearn.layers.core import input_data, dropout,fully_connected
+from tflearn.layers.estimator import regression
+from tensorflow import keras
+
+# TRAIN_DIR = 'train'
+# TEST_DIR = 'test'
+IMG_SIZE = 50
+learning_rate = 0.1
+model_name = 'image-classifier-cnn'
+
+#def create_label(image_name):
+#    world_label = image_name.split('.')[-3]
+#    
+"LOAD DATASET"
+mnist = keras.datasets.mnist
+(X_tr,y_tr),(X_t,y_t) = mnist.load_data()
+print(type(X_t),type(X_tr))
+
+X_tr = tf.keras.utils.normalize(X_tr,axis=1)
+X_t = tf.keras.utils.normalize(X_t,axis=1)
+"RESHAPE DATA"
+X_train = np.array([i[0] for i in X_tr]).reshape(-1,IMG_SIZE,IMG_SIZE,1)
+y_train = y_tr.reshape(60000,1)
+# y_train = [i[1] for i in X_tr]
+X_test = np.array([i[0] for i in X_t]).reshape(-1,IMG_SIZE,IMG_SIZE,1)
+y_test = y_t.reshape(10000,1)
+# y_test = [i[1] for i in X_t]
+ 
+"DISPLAY IMAGES"
+plt.figure(figsize=(10,10))
+
+# for i in range(25):
+#     plt.subplot(5,5,i+1)
+# #    plt.xticks([])
+# #    plt.yticks([])
+#     plt.grid(False)
+#     plt.imshow(X_train[i], cmap=plt.cm.binary)
+# #    plt.xlabel(class_names[y_train[i]])
+# plt.show()
+
+"BUILDING THE MODEL"
+tf.reset_default_graph()
+convnet = input_data(shape=[IMG_SIZE,IMG_SIZE,1], name='input')
+convnet = conv_2d(convnet,32,5,activation='relu')
+convnet = max_pool_2d(convnet,5)
+convnet = conv_2d(convnet,64,5,activation='relu')
+convnet = max_pool_2d(convnet,5)
+convnet = conv_2d(convnet,128,5,activation='relu')
+convnet = max_pool_2d(convnet,5)
+convnet = conv_2d(convnet,64,5,activation='relu')
+convnet = max_pool_2d(convnet,5)
+convnet = conv_2d(convnet,32,5,activation='relu')
+convnet = max_pool_2d(convnet,5)
+convnet = fully_connected(convnet, 1024, activation='relu')
+convnet = dropout(convnet, 0.8)
+convnet = fully_connected(convnet,10,activation='softmax')
+convnet = fully_connected(convnet,1,activation='softmax')
+convnet = regression(convnet,optimizer='adam', learning_rate=learning_rate,loss='mean_square',name='targets')
+model = tflearn.DNN(convnet,tensorboard_dir='log', tensorboard_verbose=0)
+model.fit({'input':X_train},{'targets':y_train},n_epoch=100Cr,validation_set=({'input':X_test},{'targets':y_test}),
+          snapshot_step=500, show_metric=True, run_id=model_name,shuffle=True)
