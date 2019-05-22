@@ -70,5 +70,5 @@ convnet = fully_connected(convnet,10,activation='softmax')
 convnet = fully_connected(convnet,1,activation='softmax')
 convnet = regression(convnet,optimizer='adam', learning_rate=learning_rate,loss='mean_square',name='targets')
 model = tflearn.DNN(convnet,tensorboard_dir='log', tensorboard_verbose=0)
-model.fit({'input':X_train},{'targets':y_train},n_epoch=100Cr,validation_set=({'input':X_test},{'targets':y_test}),
+model.fit({'input':X_train},{'targets':y_train},n_epoch=100,validation_set=({'input':X_test},{'targets':y_test}),
           snapshot_step=500, show_metric=True, run_id=model_name,shuffle=True)
